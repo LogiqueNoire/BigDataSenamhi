@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Salidas generadas por el workflow/script.
+outputs/*.csv
+!outputs/.gitkeep
+
+# Entorno local
+.env
+.venv/
+venv/

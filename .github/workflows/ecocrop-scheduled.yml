@@ -1,0 +1,31 @@
+name: FAO EcoCrop scheduled update
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  run-ecocrop:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run FAO EcoCrop script
+        run: python scripts/ecocrop_fao_unificado.py --salida outputs/ecocrop_fao_final.csv
+
+      - name: Upload generated CSV
+        uses: actions/upload-artifact@v4
+        with:
+          name: ecocrop-fao-final
+          path: outputs/ecocrop_fao_final.csv
