@@ -146,33 +146,45 @@ def root():
 
 @app.get("/estaciones")
 def listar_estaciones():
-    """Lista todas las estaciones disponibles con sus modelos cargados"""
-    estaciones = []
-    
-    for estacion_id, info in ESTACIONES_DISPONIBLES.items():
-        modelo_cargado = estacion_id in MODELS
-        
-        estacion_data = {
-            "id": estacion_id,
-            "nombre": info['nombre'],
-            "provincia": info['provincia'],
-            "modelo_disponible": modelo_cargado
+    try:
+        estaciones = []
+
+        for estacion_id, info in ESTACIONES_DISPONIBLES.items():
+            modelo_cargado = estacion_id in MODELS
+
+            estacion_data = {
+                "id": estacion_id,
+                "nombre": info["nombre"],
+                "provincia": info["provincia"],
+                "modelo_disponible": modelo_cargado,
+            }
+
+            if modelo_cargado and estacion_id in METADATA:
+                metadata = METADATA[estacion_id]
+
+                estacion_data["ultima_fecha_datos"] = str(metadata.get("last_date"))
+
+                estacion_data["num_registros"] = int(metadata.get("num_registros", 0))
+
+                val_loss = metadata.get("val_loss")
+                estacion_data["val_loss"] = (
+                    float(val_loss) if val_loss is not None else None
+                )
+
+                estacion_data["entrenado_el"] = str(metadata.get("trained_at"))
+
+            estaciones.append(estacion_data)
+
+        return {
+            "total_estaciones": len(ESTACIONES_DISPONIBLES),
+            "modelos_cargados": len(MODELS),
+            "estaciones": estaciones,
         }
-        
-        if modelo_cargado and estacion_id in METADATA:
-            metadata = METADATA[estacion_id]
-            estacion_data["ultima_fecha_datos"] = str(metadata.get('last_date', 'N/A'))
-            estacion_data["num_registros"] = metadata.get('num_registros', 0)
-            estacion_data["val_loss"] = round(metadata.get('val_loss', 0), 4)
-            estacion_data["entrenado_el"] = str(metadata.get('trained_at', 'N/A'))
-        
-        estaciones.append(estacion_data)
-    
-    return {
-        "total_estaciones": len(ESTACIONES_DISPONIBLES),
-        "modelos_cargados": len(MODELS),
-        "estaciones": estaciones
-    }
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"error": str(e)}
 
 @app.get("/estacion/{estacion_id}")
 def info_estacion(estacion_id: str):
