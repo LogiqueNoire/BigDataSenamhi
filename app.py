@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import numpy as np
 import pickle
@@ -13,6 +14,17 @@ app = FastAPI(
     title="API de Predicción Climática La Libertad",
     description="API para predicciones climáticas por estación meteorológica usando LSTM",
     version="2.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "https://tu-frontend.vercel.app",  # cuando publiques el frontend
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # ============================================================
