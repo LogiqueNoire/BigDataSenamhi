@@ -10,6 +10,9 @@ import pandas as pd
 from typing import List, Dict
 import os
 import math
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def safe_float(value):
     try:
@@ -24,12 +27,11 @@ app = FastAPI(
     version="2.0.0"
 )
 
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://tu-frontend.vercel.app",  # cuando publiques el frontend
-    ],
+    allow_origins=[FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
