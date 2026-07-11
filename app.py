@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 from typing import List, Dict
 import os
+import math
 
 app = FastAPI(
     title="API de Predicción Climática La Libertad",
@@ -172,9 +173,35 @@ def info_estacion(estacion_id: str):
         "provincia": info['provincia'],
         "modelo_disponible": modelo_cargado
     }
+
+    print(
+        estacion_id,
+        metadata.get("val_loss"),
+        metadata.get("num_registros"),
+    )
     
     if modelo_cargado and estacion_id in METADATA:
         metadata = METADATA[estacion_id]
+
+        estacion_data["ultima_fecha_datos"] = str(metadata.get("last_date", "N/A"))
+        estacion_data["num_registros"] = int(metadata.get("num_registros", 0))
+
+        val_loss = metadata.get("val_loss")
+
+        if val_loss is not None:
+            try:
+                val_loss = float(val_loss)
+                if math.isfinite(val_loss):
+                    estacion_data["val_loss"] = round(val_loss, 4)
+                else:
+                    estacion_data["val_loss"] = None
+            except:
+                estacion_data["val_loss"] = None
+        else:
+            estacion_data["val_loss"] = None
+
+        estacion_data["entrenado_el"] = str(metadata.get("trained_at", "N/A"))
+
         response["metadata"] = {
             "ultima_fecha_datos": str(metadata.get('last_date', 'N/A')),
             "num_registros_entrenamiento": metadata.get('num_registros', 0),
