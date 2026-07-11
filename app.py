@@ -11,6 +11,13 @@ from typing import List, Dict
 import os
 import math
 
+def safe_float(value):
+    try:
+        value = float(value)
+        return value if math.isfinite(value) else None
+    except:
+        return None
+
 app = FastAPI(
     title="API de Predicción Climática La Libertad",
     description="API para predicciones climáticas por estación meteorológica usando LSTM",
@@ -203,15 +210,15 @@ def info_estacion(estacion_id: str):
         estacion_data["entrenado_el"] = str(metadata.get("trained_at", "N/A"))
 
         response["metadata"] = {
-            "ultima_fecha_datos": str(metadata.get('last_date', 'N/A')),
-            "num_registros_entrenamiento": metadata.get('num_registros', 0),
-            "lookback_dias": metadata.get('lookback', 30),
-            "horizonte_prediccion": metadata.get('forecast_horizon', 7),
-            "val_loss": round(metadata.get('val_loss', 0), 4),
-            "val_mae": round(metadata.get('val_mae', 0), 4),
-            "epocas_entrenadas": metadata.get('epochs_run', 0),
-            "fecha_entrenamiento": str(metadata.get('trained_at', 'N/A')),
-            "variables": metadata.get('feature_names', [])
+            "ultima_fecha_datos": str(metadata.get("last_date", "N/A")),
+            "num_registros_entrenamiento": int(metadata.get("num_registros", 0)),
+            "lookback_dias": int(metadata.get("lookback", 30)),
+            "horizonte_prediccion": int(metadata.get("forecast_horizon", 7)),
+            "val_loss": safe_float(metadata.get("val_loss")),
+            "val_mae": safe_float(metadata.get("val_mae")),
+            "epocas_entrenadas": int(metadata.get("epochs_run", 0)),
+            "fecha_entrenamiento": str(metadata.get("trained_at", "N/A")),
+            "variables": metadata.get("feature_names", [])
         }
     
     return response
@@ -281,18 +288,18 @@ def predecir_clima(request: PrediccionRequest):
         for i, fecha in enumerate(future_dates):
             predicciones_list.append(PrediccionDia(
                 fecha=fecha.strftime('%Y-%m-%d'),
-                temperatura_max=round(float(predictions_inv[i, 0]), 2),
-                temperatura_min=round(float(predictions_inv[i, 1]), 2),
-                precipitacion=round(float(predictions_inv[i, 2]), 2),
-                humedad=round(float(predictions_inv[i, 3]), 2)
+                temperatura_max=safe_float(predictions_inv[i, 0]),
+                temperatura_min=safe_float(predictions_inv[i, 1]),
+                precipitacion=safe_float(predictions_inv[i, 2]),
+                humedad=safe_float(predictions_inv[i, 3])
             ))
         
         # Calcular promedios
         promedios = {
-            "temperatura_max_promedio": round(float(predictions_inv[:, 0].mean()), 2),
-            "temperatura_min_promedio": round(float(predictions_inv[:, 1].mean()), 2),
-            "precipitacion_acumulada": round(float(predictions_inv[:, 2].sum()), 2),
-            "humedad_promedio": round(float(predictions_inv[:, 3].mean()), 2)
+            "temperatura_max_promedio": safe_float(predictions_inv[:, 0].mean()),
+            "temperatura_min_promedio": safe_float(predictions_inv[:, 1].mean()),
+            "precipitacion_acumulada": safe_float(predictions_inv[:, 2].sum()),
+            "humedad_promedio": safe_float(predictions_inv[:, 3].mean()),
         }
         
         info_estacion = ESTACIONES_DISPONIBLES[request.estacion_id]
