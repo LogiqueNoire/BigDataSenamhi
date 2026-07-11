@@ -4,7 +4,7 @@ uvicorn[standard]==0.24.0
 pydantic==2.5.0
 
 # Machine Learning
-tensorflow==2.19.0
+tensorflow==2.21.0
 scikit-learn==1.5.1
 
 # Data Processing
