@@ -63,7 +63,7 @@ async def load_models():
         try:
             if os.path.exists(model_path) and os.path.exists(scaler_path) and os.path.exists(metadata_path):
                 # Cargar modelo
-                MODELS[estacion_id] = keras.models.load_model(model_path)
+                MODELS[estacion_id] = keras.models.load_model(model_path, compile=False)
                 
                 # Cargar scaler
                 with open(scaler_path, 'rb') as f:
