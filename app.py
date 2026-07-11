@@ -168,46 +168,32 @@ def listar_estaciones():
 @app.get("/estacion/{estacion_id}")
 def info_estacion(estacion_id: str):
     """Obtiene información detallada de una estación específica"""
+
     if estacion_id not in ESTACIONES_DISPONIBLES:
-        raise HTTPException(status_code=404, detail=f"Estación {estacion_id} no existe")
-    
+        raise HTTPException(
+            status_code=404,
+            detail=f"Estación {estacion_id} no existe"
+        )
+
     info = ESTACIONES_DISPONIBLES[estacion_id]
     modelo_cargado = estacion_id in MODELS
-    
+
     response = {
         "id": estacion_id,
-        "nombre": info['nombre'],
-        "provincia": info['provincia'],
+        "nombre": info["nombre"],
+        "provincia": info["provincia"],
         "modelo_disponible": modelo_cargado
     }
 
-    print(
-        estacion_id,
-        metadata.get("val_loss"),
-        metadata.get("num_registros"),
-    )
-    
     if modelo_cargado and estacion_id in METADATA:
         metadata = METADATA[estacion_id]
 
-        estacion_data["ultima_fecha_datos"] = str(metadata.get("last_date", "N/A"))
-        estacion_data["num_registros"] = int(metadata.get("num_registros", 0))
-
-        val_loss = metadata.get("val_loss")
-
-        if val_loss is not None:
-            try:
-                val_loss = float(val_loss)
-                if math.isfinite(val_loss):
-                    estacion_data["val_loss"] = round(val_loss, 4)
-                else:
-                    estacion_data["val_loss"] = None
-            except:
-                estacion_data["val_loss"] = None
-        else:
-            estacion_data["val_loss"] = None
-
-        estacion_data["entrenado_el"] = str(metadata.get("trained_at", "N/A"))
+        print(
+            estacion_id,
+            metadata.get("val_loss"),
+            metadata.get("val_mae"),
+            metadata.get("num_registros"),
+        )
 
         response["metadata"] = {
             "ultima_fecha_datos": str(metadata.get("last_date", "N/A")),
@@ -220,7 +206,7 @@ def info_estacion(estacion_id: str):
             "fecha_entrenamiento": str(metadata.get("trained_at", "N/A")),
             "variables": metadata.get("feature_names", [])
         }
-    
+
     return response
 
 @app.post("/predecir", response_model=PrediccionResponse)
