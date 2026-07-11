@@ -1,4 +1,15 @@
-beautifulsoup4==4.12.3
-pandas==2.2.3
-requests==2.32.3
-tqdm==4.67.1
+# API Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+
+# Machine Learning
+tensorflow==2.21.0
+scikit-learn==1.5.1
+
+# Data Processing
+pandas==2.2.2
+numpy==2.0.1
+
+# HTTP Client (para tests)
+requests==2.31.0
